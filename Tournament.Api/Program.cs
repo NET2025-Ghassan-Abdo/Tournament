@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Tournament.Api;
 using Tournament.Api.Extensions;
 using Tournament.Api.Mappings;
+using Tournament.Core.Interfaces;
 using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 using Tournament.Data.Repositories;
@@ -29,6 +30,7 @@ namespace Tournament.Api
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
             builder.Services.AddScoped<IGameRepository, GameRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             var app = builder.Build();
             app.MapControllers();

@@ -12,6 +12,7 @@ namespace Tournament.Core.DTOs
         // Use string.Empty to ensure Title is never null by default
         public string Title { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
+        public IEnumerable<GameDto> Games { get; init; }
 
 
 

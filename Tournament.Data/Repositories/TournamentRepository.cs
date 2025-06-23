@@ -14,10 +14,9 @@ namespace Tournament.Data.Repositories
             context.SaveChanges();
         }
 
-        public async  Task<bool> AnyAsync(int id)
+        public async  Task<bool> FindAsync(int id)
         {
             return await context.Tournaments.AnyAsync(t => t.Id == id);
-
         }
 
         public async Task<IEnumerable<TournamentDetails>> GetAllAsync()
