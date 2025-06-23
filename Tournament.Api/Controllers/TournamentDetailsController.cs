@@ -48,6 +48,7 @@ namespace Tournament.Api.Controllers
                 // Map and set Games to null or empty for each DTO
                 dtoList = _mapper.Map<IEnumerable<TournamentDetailsDto>>(tournaments)
                     .Select(dto => dto with { Games = null }); // or Enumerable.Empty<GameDto>()
+                await _unitOfWork.SaveChangesAsync();
             }
 
             return Ok(dtoList);
@@ -64,6 +65,7 @@ namespace Tournament.Api.Controllers
 
             _mapper.Map(dto, existingTournament);
             _unitOfWork.Tournaments.Update(existingTournament);
+            await _unitOfWork.SaveChangesAsync();
 
             return NoContent();
         }
@@ -79,6 +81,7 @@ namespace Tournament.Api.Controllers
             };
 
             _unitOfWork.Tournaments.Add(tournamentDetails);
+            await _unitOfWork.SaveChangesAsync();
 
             return CreatedAtAction("GetTournamentDetails", new { id = tournamentDetails.Id }, tournamentDetails);
         }
@@ -94,6 +97,7 @@ namespace Tournament.Api.Controllers
             }
 
             _unitOfWork.Tournaments.Remove(id);
+            await _unitOfWork.SaveChangesAsync();
 
             return NoContent();
         }
