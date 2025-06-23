@@ -10,8 +10,8 @@ using Tournament.Data.Data;
 
 namespace Tournament.Data.Migrations
 {
-    [DbContext(typeof(TournamentApiContext))]
-    partial class TournamentApiContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(TournamentDbContext))]
+    partial class TournamentDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -37,10 +37,15 @@ namespace Tournament.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TournamentDetailsId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TournamnetId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TournamentDetailsId");
 
                     b.ToTable("Game");
                 });
@@ -53,13 +58,28 @@ namespace Tournament.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TournamentDetails");
+                    b.ToTable("Tournaments");
+                });
+
+            modelBuilder.Entity("Tournament.Core.Entities.Game", b =>
+                {
+                    b.HasOne("Tournament.Core.Entities.TournamentDetails", null)
+                        .WithMany("Games")
+                        .HasForeignKey("TournamentDetailsId");
+                });
+
+            modelBuilder.Entity("Tournament.Core.Entities.TournamentDetails", b =>
+                {
+                    b.Navigation("Games");
                 });
 #pragma warning restore 612, 618
         }

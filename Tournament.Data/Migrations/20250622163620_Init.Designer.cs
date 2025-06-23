@@ -11,9 +11,9 @@ using Tournament.Data.Data;
 
 namespace Tournament.Data.Migrations
 {
-    [DbContext(typeof(TournamentApiContext))]
-    [Migration("20250618223144_initial")]
-    partial class initial
+    [DbContext(typeof(TournamentDbContext))]
+    [Migration("20250622163620_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,10 +40,15 @@ namespace Tournament.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TournamentDetailsId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TournamnetId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TournamentDetailsId");
 
                     b.ToTable("Game");
                 });
@@ -56,13 +61,28 @@ namespace Tournament.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TournamentDetails");
+                    b.ToTable("Tournaments");
+                });
+
+            modelBuilder.Entity("Tournament.Core.Entities.Game", b =>
+                {
+                    b.HasOne("Tournament.Core.Entities.TournamentDetails", null)
+                        .WithMany("Games")
+                        .HasForeignKey("TournamentDetailsId");
+                });
+
+            modelBuilder.Entity("Tournament.Core.Entities.TournamentDetails", b =>
+                {
+                    b.Navigation("Games");
                 });
 #pragma warning restore 612, 618
         }

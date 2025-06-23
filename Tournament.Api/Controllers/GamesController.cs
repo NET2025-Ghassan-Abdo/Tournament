@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Tournament.Data.Data;
+using Tournament.Core.DTOs;
 using Tournament.Core.Entities;
+using Tournament.Core.Repositories;
 
 namespace Tournament.Api.Controllers
 {
@@ -14,95 +10,69 @@ namespace Tournament.Api.Controllers
     [ApiController]
     public class GamesController : ControllerBase
     {
-        private readonly TournamentApiContext _context;
+        private readonly IGameRepository _gameRepository;
+        private readonly IMapper _mapper;
 
-        public GamesController(TournamentApiContext context)
+        public GamesController(IGameRepository gameRepository, IMapper mapper)
         {
-            _context = context;
+            _gameRepository = gameRepository;
+            _mapper = mapper;
         }
+    // ...
 
         // GET: api/Games
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Game>>> GetGame()
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetGames()
         {
-            return await _context.Game.ToListAsync();
+            var games = await _gameRepository.GetAllAsync();
+            var gameDtos = _mapper.Map<IEnumerable<GameDto>>(games);
+            return Ok(gameDtos);
         }
 
         // GET: api/Games/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Game>> GetGame(int id)
+        public async Task<ActionResult<GameDto>> GetGame(int id)
         {
-            var game = await _context.Game.FindAsync(id);
-
+            var game = await _gameRepository.GetAsync(id);
             if (game == null)
-            {
                 return NotFound();
-            }
 
-            return game;
+            var gameDto = _mapper.Map<GameDto>(game);
+            return Ok(gameDto);
         }
 
         // PUT: api/Games/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGame(int id, Game game)
+        public  IActionResult PutGame(int id, GameDto gameDto)
         {
-            if (id != game.Id)
-            {
-                return BadRequest();
-            }
+            if (id != gameDto.Id)
+                return  BadRequest();
 
-            _context.Entry(game).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GameExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            var game = _mapper.Map<Game>(gameDto);
+            _gameRepository.Update(game);
             return NoContent();
         }
 
         // POST: api/Games
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(Game game)
+        public ActionResult<GameDto> PostGame(GameDto gameDto)
         {
-            _context.Game.Add(game);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetGame", new { id = game.Id }, game);
+            var game = _mapper.Map<Game>(gameDto);
+            _gameRepository.Add(game);
+            // Optionally map back to DTO if you want to return the created object
+            return CreatedAtAction(nameof(GetGame), new { id = game.Id }, _mapper.Map<GameDto>(game));
         }
 
         // DELETE: api/Games/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGame(int id)
         {
-            var game = await _context.Game.FindAsync(id);
-            if (game == null)
-            {
+            var exists = await _gameRepository.AnyAsync(id);
+            if (!exists)
                 return NotFound();
-            }
 
-            _context.Game.Remove(game);
-            await _context.SaveChangesAsync();
-
+            _gameRepository.Remove(id);
             return NoContent();
-        }
-
-        private bool GameExists(int id)
-        {
-            return _context.Game.Any(e => e.Id == id);
         }
     }
 }
