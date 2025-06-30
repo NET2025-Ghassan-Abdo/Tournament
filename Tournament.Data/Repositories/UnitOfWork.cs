@@ -12,17 +12,22 @@ namespace Tournament.Data.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly TournamentDbContext _context;
-        public ITournamentRepository Tournaments { get; }
-        public IGameRepository Games { get; }
-        public UnitOfWork(TournamentDbContext context, ITournamentRepository tournaments, IGameRepository games)
+
+        public ITournamentRepository TournamentRepository { get; }
+
+        public IGameRepository GameRepository { get; }
+
+        public UnitOfWork(TournamentDbContext context)
         {
             _context = context;
-            Tournaments = tournaments;
-            Games = games ;
+            TournamentRepository = new TournamentRepository(context);
+            GameRepository = new GameRepository(context);
         }
-        public async Task<int> SaveChangesAsync()
+        
+
+        public async Task CompleteAsync()
         {
-            return await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
     }
 }

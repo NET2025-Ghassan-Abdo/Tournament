@@ -16,6 +16,6 @@ namespace Tournament.Data.Data
         }
 
         public DbSet<TournamentDetails> Tournaments { get; set; } = null!;
-        public DbSet<Game> Game { get; set; } = null!;
+        public DbSet<Game> Games { get; set; } = null!;
     }
 }

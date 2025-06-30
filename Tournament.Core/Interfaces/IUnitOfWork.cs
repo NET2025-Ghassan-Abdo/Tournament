@@ -9,8 +9,8 @@ namespace Tournament.Core.Interfaces
 {
     public interface IUnitOfWork
     {
-        ITournamentRepository Tournaments { get; }
-        IGameRepository Games { get; }
-        Task<int> SaveChangesAsync();
+        ITournamentRepository TournamentRepository { get; }
+        IGameRepository GameRepository { get; }
+        Task CompleteAsync();
     }
 }

@@ -1,52 +1,43 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 using Tournament.Data.Data;
 
 namespace Tournament.Data.Repositories
 {
-    public class TournamentRepository(TournamentDbContext context) : ITournamentRepository
+    public class TournamentRepository : ITournamentRepository
     {
-        
+        private readonly TournamentDbContext _context;
+
+        public TournamentRepository(TournamentDbContext context)
+        {
+            _context = context;
+        }
+
         public void Add(TournamentDetails tournament)
         {
-            context.Tournaments.Add(tournament);
-            context.SaveChanges();
+            _context.Tournaments.Add(tournament);
         }
 
-        public async  Task<bool> FindAsync(int id)
+        public void Delete(TournamentDetails tournament)
         {
-            return await context.Tournaments.AnyAsync(t => t.Id == id);
+            _context.Tournaments.Remove(tournament);
         }
 
-        public async Task<IEnumerable<TournamentDetails>> GetAllAsync()
+        public async Task<TournamentDetails> GetTournamentAsync(int id)
         {
-            return await context.Tournaments
-                .Include(t => t.Games)
-                .ToListAsync();
+            return await _context.Tournaments.FindAsync(id);
         }
 
-        public Task<TournamentDetails> GetAsync(int id)
+        public async Task<IEnumerable<TournamentDetails>> GetTournamentsAsync(bool includeGames = false)
         {
-            return context.Tournaments
-                .Include(t => t.Games)
-                .FirstOrDefaultAsync(t => t.Id == id);
-        }
-
-        public void Remove(int id)
-        {
-            var tournament = context.Tournaments.Find(id);
-            if (tournament != null)
-            {
-                context.Tournaments.Remove(tournament);
-                context.SaveChanges();
-            }
-        }
-
-        public void Update(TournamentDetails tournament)
-        {
-            context.Tournaments.Update(tournament);
-            context.SaveChanges();
+            return includeGames ?     await _context.Tournaments.Include(c => c.Games).ToListAsync()
+                                    : await _context.Tournaments.ToListAsync();
         }
     }
 }
